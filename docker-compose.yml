@@ -1,0 +1,58 @@
+services:
+  db:
+    image: postgres:15
+    container_name: risk_auditor_db
+    env_file:
+      - .env
+    environment:
+      POSTGRES_USER: ${DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-123456}
+      POSTGRES_DB: ${DB_NAME:-risk_auditor}
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./.data/postgres_db:/var/lib/postgresql/data
+
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: risk_auditor_pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL:-admin@admin.com}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD:-admin}
+    ports:
+      - "8080:80"
+    depends_on:
+      - db
+
+  chromadb:
+    image: chromadb/chroma:latest
+    container_name: risk_auditor_chroma
+    ports:
+      - "8001:8000"
+    volumes:
+      - ./.data/chroma_server:/chroma/chroma
+
+  backend:
+    build: ./backend
+    container_name: risk_auditor_backend
+    env_file:
+      - .env
+    environment:
+      - DATABASE_URL=postgresql://${DB_USER:-postgres}:${DB_PASSWORD:-123456}@db:5432/${DB_NAME:-risk_auditor}
+      - CHROMA_HOST=chromadb
+      - CHROMA_PORT=8000
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./.data/uploads:/app/data
+    depends_on:
+      - db
+      - chromadb
+
+  frontend:
+    build: ./frontend
+    container_name: risk_auditor_frontend
+    ports:
+      - "5173:80"
+    depends_on:
+      - backend

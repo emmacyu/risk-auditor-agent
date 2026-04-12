@@ -1,0 +1,16 @@
+fastapi
+uvicorn
+python-multipart
+langchain
+langgraph
+langchain-openai
+langchain-community
+chromadb
+langchain-chroma
+psycopg[binary]
+pypdf
+python-dotenv
+langgraph-checkpoint-postgres
+psycopg_pool
+pydantic-settings
+sentence-transformers

@@ -1,0 +1,37 @@
+# === Infrastructure & Sensitive Data ===
+# Physical data of the infrastructure (Do not commit)
+.data/
+
+# Environment variables holding passwords and API keys (Do not commit)
+.env
+.env.*
+
+# === Backend (Python) ===
+# Byte-compiled files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+venv*/
+env/
+.venv/
+
+# Testing and code coverage
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Temporary files created by OS and IDE
+.idea/
+.vscode/
+.DS_Store
+*.swp
+*.log
+
+# === Frontend (Node/React/Tailwind) ===
+# Frontend build and dependency directories
+node_modules/
+dist/
+build/
+.next/
