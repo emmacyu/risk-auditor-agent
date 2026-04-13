@@ -9,10 +9,19 @@ from langgraph.checkpoint.postgres import PostgresSaver
 from app.services.vector_store import get_vector_store
 from app.services.database import get_db_pool
 from app.config import settings
+from app.prompts import (
+    DISPATCHER_PROMPT,
+    REWRITE_PROMPT,
+    EXPAND_PROMPT,
+    CHAT_PROMPT,
+    AUDIT_PROMPT,
+    HALLUCINATION_PROMPT,
+    HALLUCINATION_SYS_MSG
+)
 
 # Define universal LLM engine here
 llm = ChatOpenAI(
-    model="openai/gpt-4o-mini",
+    model=settings.LLM_MODEL,
     temperature=0,  # Force generation to be highly robust and deterministic for risk auditing
     api_key=settings.OPENROUTER_API_KEY,
     base_url="https://openrouter.ai/api/v1"
@@ -44,9 +53,7 @@ def dispatcher_node(state: AgentState):
     # Extract recent context to assist intention recognition
     history = "\n".join([f"{m.type}: {m.content}" for m in messages[-3:-1]]) if len(messages) > 1 else "None"
     
-    sys_msg = SystemMessage(content=f"""You are an intent recognizer. If the user asks about risk control, compliance, clause interpretation, or auditing (even utilizing pronouns like 'what does it mean', as long as previous context relates to risk), reply ONLY with the word AUDIT.
-    If it is purely casual small talk disconnected from business, reply ONLY with the word CHAT.
-    Historical Context: {history}""")
+    sys_msg = SystemMessage(content=DISPATCHER_PROMPT.format(history=history))
     
     resp = llm.invoke([sys_msg, HumanMessage(content=last_msg)])
     
@@ -73,10 +80,7 @@ def retrieve_node(state: AgentState):
     # 🚨 1st Advanced Mechanism: Contextual Query Rewrite (Resolving Pronouns)
     if len(messages) > 1 and state.get("retry_count", 0) == 0:
         history_text = "\n".join([f"{m.type}: {m.content}" for m in messages[-4:-1]])
-        rewrite_prompt = f"""You are a search query optimizer. Given the following conversation history, the user may have used pronouns in their latest question (e.g., 'it', 'this meaning') or omitted the subject.
-        Please combine the context and rewrite the user's latest question into an independent, complete, and explicit search sentence for database retrieval (if no rewrite is needed, return it exactly as is, without any extra explanations):
-        History: {history_text}
-        Current question: {last_msg}"""
+        rewrite_prompt = REWRITE_PROMPT.format(history_text=history_text, last_msg=last_msg)
         rewrite_resp = llm.invoke([HumanMessage(content=rewrite_prompt)])
         query = rewrite_resp.content.strip()
         print(f"🔄 [Context Rewrite] '{last_msg}' -> '{query}'")
@@ -84,7 +88,7 @@ def retrieve_node(state: AgentState):
     # 🚨 2nd Advanced Mechanism: Query Expansion based on Auditor Rejections
     if state.get("retry_count", 0) > 0 and state.get("audit_trail"):
         feedback = state["audit_trail"][-1]
-        expand_prompt = f"The user's previous search term was: {query}.\nHowever, the audit judge criticized it: {feedback}.\nPlease generate a entirely new search keyword phrase based on this criticism, aimed at finding the exact compliance clause (no extra explanations):"
+        expand_prompt = EXPAND_PROMPT.format(query=query, feedback=feedback)
         expand_resp = llm.invoke([HumanMessage(content=expand_prompt)])
         query = expand_resp.content.strip()
         print(f"🔄 [Correction Rewrite] Fusing penalizing feedback -> '{query}'")
@@ -106,18 +110,9 @@ def generate_node(state: AgentState):
     intent = state.get("intent", "chat")
     
     if intent == "chat":
-        sys_prompt = "You are a senior AI security assistant for the risk control team. Please engage with the user naturally or explain professional concepts directly based on chat history, staying professional and composed."
+        sys_prompt = CHAT_PROMPT
     else:
-        sys_prompt = f"""You are a Chief AI System Architect and Risk Review Officer.
-        Please answer the user's question STRICTLY combining the following [Extracted Official Context] and [Chat History].
-        [CRITICAL RULES]
-        1. If you cite information from the context, you MUST tag its source (e.g. Page number) before the period.
-        2. If the user asks you to explain a concept just mentioned (e.g. 'what does it mean'), give a professional and adequate explanation using your LLM knowledge.
-        3. If the user asks about an entirely new clause and absolutely zero related info exists in the context, directly state 'Cannot find related content in the database'.
-        
-        Context:
-        {context if context else 'No reference materials'}
-        """
+        sys_prompt = AUDIT_PROMPT.format(context=context if context else 'No reference materials')
     
     messages = [SystemMessage(content=sys_prompt)] + state["messages"]
     response = llm.invoke(messages)
@@ -134,24 +129,15 @@ def auditor_node(state: AgentState):
     last_aimessage = state["messages"][-1].content
     context = state.get("current_context", "")
     
-    prompt = f"""You are a ruthless hallucination checker. Contrast the following [Reference Context] against the [AI Answer].
-    
-    Reference Context:
-    {context}
-    
-    AI Answer:
-    {last_aimessage}
-    
-    Strictly evaluate: Does the AI answer contain falsified, invented, or over-extended hallucinated content?
-    You MUST output a JSON dictionary containing:
-    A boolean field 'is_hallucinating' (true if hallucination exists, false if perfectly accurate).
-    A string field 'feedback' (If hallucination exists, provide specific rejection feedback for the AI to retrieve better text; if safe, leave empty).
-    """
+    prompt = HALLUCINATION_PROMPT.format(
+        context=context,
+        last_aimessage=last_aimessage
+    )
     
     # Force the LLM to return a strict JSON Object
     eval_llm = llm.bind(response_format={"type": "json_object"})
     resp = eval_llm.invoke([
-        SystemMessage(content="You are a structured risk control system. Output must be valid JSON."), 
+        SystemMessage(content=HALLUCINATION_SYS_MSG), 
         HumanMessage(content=prompt)
     ])
     
