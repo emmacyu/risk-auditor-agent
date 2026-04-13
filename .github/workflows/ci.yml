@@ -24,7 +24,7 @@ jobs:
 
     - name: Launch local Docker infrastructure
       run: |
-        docker-compose up -d --build
+        docker compose up -d --build
         echo "Waiting for services (Postgres, Redis, Chroma) to stabilize..."
         sleep 10
         
@@ -38,4 +38,4 @@ jobs:
         
     - name: Shutdown infrastructure
       if: always()
-      run: docker-compose down
+      run: docker compose down
