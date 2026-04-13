@@ -61,24 +61,24 @@ config:
 ---
 graph LR;
     subgraph Core Audit Loop
-        retrieve_node(🍁 retrieve_node)
-        generate_node(⚙️ generate_node)
-        auditor_node(⚖️ auditor_node)
+        retrieve_node(🍁<br>Retriever)
+        generate_node(⚙️<br>Generator)
+        auditor_node(⚖️<br>Auditor)
     end
     
-    __start__([<p>START</p>]):::first
-    dispatcher(🧠 dispatcher)
-    __end__([<p>END</p>]):::last
+    __start__([START]):::first
+    dispatcher(🧠<br>Dispatcher)
+    __end__([END]):::last
 
     __start__ --> dispatcher;
-    dispatcher -.Casual Chat.-> generate_node;
-    dispatcher -.Audit Intent.-> retrieve_node;
+    dispatcher -.Casual<br>Chat.-> generate_node;
+    dispatcher -.Audit<br>Intent.-> retrieve_node;
     
     retrieve_node --> generate_node;
     generate_node --> auditor_node;
     
-    auditor_node -.Hallucination Detected.-> retrieve_node;
-    auditor_node -.Passed Verification.-> __end__;
+    auditor_node -.Hallucinate.-> retrieve_node;
+    auditor_node -.Pass.-> __end__;
 
     %% 这是一个透明的占位符节点，专门用来把 GitHub 的放大缩小控件往右边顶开，防止遮挡 END 节点
     __end__ ~~~ padding_node[" "]
