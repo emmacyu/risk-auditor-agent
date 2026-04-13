@@ -19,13 +19,23 @@ from app.prompts import (
     HALLUCINATION_SYS_MSG
 )
 
-# Define universal LLM engine here
-llm = ChatOpenAI(
+# Define universal LLM engines with built-in failover capabilities
+llm_primary = ChatOpenAI(
     model=settings.LLM_MODEL,
     temperature=0,  # Force generation to be highly robust and deterministic for risk auditing
     api_key=settings.OPENROUTER_API_KEY,
     base_url="https://openrouter.ai/api/v1"
 )
+
+llm_fallback = ChatOpenAI(
+    model=settings.FALLBACK_LLM_MODEL,
+    temperature=0,
+    api_key=settings.OPENROUTER_API_KEY,
+    base_url="https://openrouter.ai/api/v1"
+)
+
+# LangChain will automatically intercept 429/500/Timeout errors and seamlessly route to the fallback model
+llm = llm_primary.with_fallbacks([llm_fallback])
 
 # =========================================================================
 # 1. Core Agent State - handling storage, memory, and serving as system's diagnostic black box

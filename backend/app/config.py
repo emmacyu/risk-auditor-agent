@@ -14,6 +14,7 @@ class Settings(BaseSettings):
     
     # Optional parameters with default fallbacks
     LLM_MODEL: str = "openai/gpt-4o-mini"
+    FALLBACK_LLM_MODEL: str = "anthropic/claude-3-haiku"
     EMBEDDING_MODEL: str = "all-MiniLM-L6-v2"
     
     # 精准锁定绝对路径
