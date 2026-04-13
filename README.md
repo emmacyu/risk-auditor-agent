@@ -24,6 +24,31 @@ An enterprise-grade, Multi-Agent Risk Management Assistant designed to parse, qu
 5. **Premium Cyberpunk Glassmorphism UI**
    A dual-pane web application built on Vite + React + TailwindCSS v4 with drag-and-drop document upload and fluid micro-animations.
 
+## 🗂️ Repository Structure
+
+```text
+.
+├── backend                 # Python backend service (FastAPI)
+│   ├── app
+│   │   ├── main.py         # FastAPI entrypoint & HTTP routes
+│   │   ├── config.py       # Pydantic environment configuration, to avoid loading .env multiple times
+│   │   ├── prompts.py      # Core prompt templates for LLMs，separated for latter prompt engineering
+│   │   └── services
+│   │       ├── agent.py         # LangGraph state machine & AI logic
+│   │       ├── database.py      # PostgreSQL checkpointer
+│   │       └── vector_store.py  # ChromaDB semantic retrieval
+│   ├── Dockerfile          # Backend container definition
+│   └── tests               # Pytest testing suite
+├── frontend                # React web application (Vite)
+│   ├── src
+│   │   ├── App.jsx         # Main UI interface
+│   │   ├── App.css         # styling
+│   │   └── index.css       # styling
+│   ├── Dockerfile          # Frontend container definition
+│   └── nginx.conf          # NGINX configuration
+└── docker-compose.yml      # Orchestrates the entire stack (Chroma, Postgres, Redis, etc.)
+```
+
 ## 🚀 Quick Start
 
 The entire application stack (Frontend, Backend, Postgres, ChromaDB, Redis) is completely containerized. You do not need to install Node or Python locally.
