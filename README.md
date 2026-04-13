@@ -49,6 +49,42 @@ An enterprise-grade, Multi-Agent Risk Management Assistant designed to parse, qu
 └── docker-compose.yml           # Orchestrates the entire stack (Chroma, Postgres, Redis, etc.)
 ```
 
+## ⚙️ AI Agent Workflow (LangGraph)
+
+The internal reasoning engine leverages cyclical state machines rather than linear chains to achieve self-reflection and hallucination prevention.
+
+```mermaid
+---
+config:
+  flowchart:
+    curve: basis
+---
+graph LR;
+    subgraph Core Audit Loop
+        retrieve_node(🍁 retrieve_node)
+        generate_node(⚙️ generate_node)
+        auditor_node(⚖️ auditor_node)
+    end
+    
+    __start__([<p>START</p>]):::first
+    dispatcher(🧠 dispatcher)
+    __end__([<p>END</p>]):::last
+
+    __start__ --> dispatcher;
+    dispatcher -.Casual Chat.-> generate_node;
+    dispatcher -.Audit Intent.-> retrieve_node;
+    
+    retrieve_node --> generate_node;
+    generate_node --> auditor_node;
+    
+    auditor_node -.Hallucination Detected.-> retrieve_node;
+    auditor_node -.Passed Verification.-> __end__;
+
+    classDef default fill:#f2f0ff,line-height:1.2,stroke:#bfb6fc,stroke-width:2px
+    classDef first fill-opacity:0,stroke:#888
+    classDef last fill:#bfb6fc
+```
+
 ## 🚀 Quick Start
 
 The entire application stack (Frontend, Backend, Postgres, ChromaDB, Redis) is completely containerized. You do not need to install Node or Python locally.
@@ -70,6 +106,7 @@ docker compose up -d --build
 - **Frontend UI**: `http://localhost:5173`
 - **Backend API Docs**: `http://localhost:8000/docs`
 - **PGAdmin (DB Viewer)**: `http://localhost:8080`
+
 
 ## 🏢 FAQ (Architecture Decisions)
 

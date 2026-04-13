@@ -200,7 +200,14 @@ def get_agent_app():
     builder.add_edge(START, "dispatcher")
     
     # Dispatcher -> Fork (Retrieve vs Chat Generate)
-    builder.add_conditional_edges("dispatcher", route_after_dispatcher)
+    builder.add_conditional_edges(
+        "dispatcher", 
+        route_after_dispatcher,
+        {
+            "retrieve_node": "retrieve_node",
+            "generate_node": "generate_node"
+        }
+    )
     
     # Retrieve -> Generate
     builder.add_edge("retrieve_node", "generate_node")
@@ -208,6 +215,15 @@ def get_agent_app():
     # Generate -> Logic Auditor
     builder.add_edge("generate_node", "auditor_node")
     
+    # Auditor -> Loop back to Retrieve or END
+    builder.add_conditional_edges(
+        "auditor_node",
+        route_after_auditor,
+        {
+            "retrieve_node": "retrieve_node",
+            END: END
+        }
+    )
     
     # Avoid forcing database hookups here; instead, expose the raw architecture blueprint (builder)
     # Allowing FastAPI or test scripts to hook up real databases inside their own Async Event Loops
