@@ -111,6 +111,16 @@ docker compose up -d --build
 - **Backend API Docs**: `http://localhost:8000/docs`
 - **PGAdmin (DB Viewer)**: `http://localhost:8080`
 
+## 📊 Observability & Telemetry (LangSmith)
+
+To enable zero-code enterprise-grade tracing (Token usage, Latency tracking, and Node trace trees), this repository has native support for LangSmith telemetry:
+1. Create a free account at [Langchain Smith](https://smith.langchain.com/) and generate an API key.
+2. Edit your local `.env` file to include the telemetry flags:
+```bash
+LANGCHAIN_TRACING_V2="true"
+LANGCHAIN_API_KEY="lsv2_pt_your_api_key_here..."
+```
+3. Restart the background stack with `docker compose up -d`. All AI reasoning loops will now stream live to your cloud dashboard.
 
 ## 🏢 FAQ (Architecture Decisions)
 
@@ -130,7 +140,9 @@ docker compose up -d --build
 ### 3. Why did you choose this specific way to handle memory?
 Memory is managed by **LangGraph's AsyncPostgresSaver**. The system relies on this over simple in-memory arrays for 3 critical reasons:
 1. **Stateless Scalability**: Permits scaling FastAPI horizontally across instances without "amnesia" since states exist on PG.
-2. **Prerequisite for HITL**: Freezing an execution loop and waking it up hours later based solely on the tuple `(thread_id, state_checkpoint)` stored in Postgres is required for asynchronous Human-In-The-Loop approvals.
+2. **Prerequisite for HITL**: Freezing an execution loop and waking it up hours later based solely on the tuple `(thread_id, state_checkpoint)` stored in Postgres is required for asynchronous Human-In-The-Loop approvals. 
+通常的 AI 聊天脚本是靠 Python 内存里的 Array 数组来硬存对话历史，这在企业级生产里是不可接受的，只要服务器一重启，所有的 AI 都会失忆。
+我引入了 PostgresSaver 这个数据旁路拦截器。每一次 AI 节点之间的转折（Checkpoints），它的完整思维切片都会被异步持久化写入 PostgreSQL。这不仅打破了 FastAPI 进程不能横向扩展的隐患，更为将来实现基于同一 thread_id 的 Human-in-the-Loop（合规专员人工切入修改图谱状态，再让它继续运行）铺平了道路。”
 3. **Structured Audit Trails**: Beyond simple chat logs, Postgres natively preserves the 'inner cognitive state' of the agent (retry counts, flagged hallucination boolean flags), providing indisputable historical evidence required in physical legal/compliance audits.
 
 ### 4. How did you ensure the system is fast?

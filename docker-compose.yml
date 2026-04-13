@@ -48,6 +48,10 @@ services:
       - CHROMA_HOST=chromadb
       - CHROMA_PORT=8000
       - REDIS_URL=redis://redis:6379
+      # --- LangSmith Telemetry (Optional) ---
+      - LANGCHAIN_TRACING_V2=${LANGCHAIN_TRACING_V2:-false}
+      - LANGCHAIN_PROJECT=${LANGCHAIN_PROJECT:-Risk-Auditor-Agent}
+      - LANGCHAIN_API_KEY=${LANGCHAIN_API_KEY:-}
     ports:
       - "8000:8000"
     volumes:
