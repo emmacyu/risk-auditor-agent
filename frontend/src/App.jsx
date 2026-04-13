@@ -10,6 +10,9 @@ function App() {
   const [isTyping, setIsTyping] = useState(false);
   const scrollRef = useRef(null);
 
+  // Generate a dynamic session ID on load so Postgres Checkpointer doesn't pollute strict prompt rules with old bad context
+  const [sessionId] = useState(() => `session_${Math.random().toString(36).substring(2, 10)}`);
+
   // Manage the upload state here
   const [isUploading, setIsUploading] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
@@ -35,7 +38,7 @@ function App() {
       const response = await fetch('http://localhost:8000/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: userMsg, user_id: 'risk_officer_frontend' })
+        body: JSON.stringify({ message: userMsg, user_id: sessionId })
       });
       
       const data = await response.json();
@@ -111,15 +114,15 @@ function App() {
       <div className="glass-panel w-full h-full max-w-7xl rounded-3xl overflow-hidden flex flex-col md:flex-row relative z-10">
         
         {/* 左侧：智能交互终端 (聊天区) */}
-        <div className="flex-1 flex flex-col border-r border-slate-700/50 bg-slate-900/20">
+        <div className="flex-1 flex flex-col border-r border-gray-200 bg-white">
           {/* Header */}
-          <div className="px-6 py-5 border-b border-slate-700/50 flex items-center gap-3 bg-slate-900/40">
-            <div className="w-10 h-10 rounded-full bg-brand-cyan/20 flex items-center justify-center border border-brand-cyan/30">
-              <ShieldAlert className="text-brand-cyan w-5 h-5" />
+          <div className="px-6 py-5 border-b border-gray-200 flex items-center gap-3 bg-white">
+            <div className="w-10 h-10 rounded-full bg-brand-blue/10 flex items-center justify-center border border-brand-blue/20">
+              <ShieldAlert className="text-brand-blue w-5 h-5" />
             </div>
             <div>
-              <h1 className="text-xl font-semibold text-slate-100 tracking-wide">Nexus Auditor <span className="text-brand-cyan text-sm ml-2 px-2 py-0.5 rounded-full border border-brand-cyan/20 bg-brand-cyan/10">v1.2</span></h1>
-              <p className="text-xs text-slate-400 mt-0.5">LangGraph Core • Postgres Checkpointed</p>
+              <h1 className="text-xl font-semibold text-gray-900 tracking-wide">Risk Auditor Agent <span className="text-brand-blue text-sm ml-2 px-2 py-0.5 rounded-full border border-brand-blue/20 bg-brand-blue/10">v1.2</span></h1>
+              <p className="text-xs text-brand-blue/70 mt-0.5 font-medium">LangGraph Core • Postgres Checkpointed</p>
             </div>
           </div>
 
@@ -135,12 +138,12 @@ function App() {
                   className={`flex gap-4 max-w-[85%] ${msg.role === 'user' ? 'ml-auto flex-row-reverse' : ''}`}
                 >
                   {/* Avatar */}
-                  <div className={`shrink-0 w-8 h-8 rounded-full flex items-center justify-center border shadow-sm ${msg.role === 'user' ? 'bg-slate-700/50 border-slate-600' : 'bg-brand-purple/20 border-brand-purple/30'}`}>
-                    {msg.role === 'user' ? <User className="w-4 h-4 text-slate-300" /> : <Bot className="w-4 h-4 text-brand-purple" />}
+                  <div className={`shrink-0 w-8 h-8 rounded-full flex items-center justify-center border shadow-sm ${msg.role === 'user' ? 'bg-brand-blue border-brand-blue text-white' : 'bg-brand-yellow/20 border-brand-yellow/30'}`}>
+                    {msg.role === 'user' ? <User className="w-4 h-4" /> : <Bot className="w-4 h-4 text-gray-800" />}
                   </div>
                   
                   {/* Bubble */}
-                  <div className={`p-4 rounded-2xl text-sm leading-relaxed whitespace-pre-wrap shadow-sm ${msg.role === 'user' ? 'bg-slate-700/50 text-slate-100 rounded-tr-sm' : 'bg-slate-800/70 border border-slate-700/50 text-slate-200 rounded-tl-sm'}`}>
+                  <div className={`p-4 rounded-2xl text-sm leading-relaxed whitespace-pre-wrap shadow-sm ${msg.role === 'user' ? 'bg-brand-blue text-white rounded-tr-sm' : 'bg-gray-50 border border-gray-200 text-gray-800 rounded-tl-sm'}`}>
                     {msg.content}
                   </div>
                 </motion.div>
@@ -150,32 +153,32 @@ function App() {
             {/* Typing Indicator */}
             {isTyping && (
                 <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex gap-4">
-                  <div className="shrink-0 w-8 h-8 rounded-full bg-brand-purple/20 border border-brand-purple/30 flex items-center justify-center">
-                    <Bot className="w-4 h-4 text-brand-purple" />
+                  <div className="shrink-0 w-8 h-8 rounded-full bg-brand-yellow/20 border border-brand-yellow/30 flex items-center justify-center">
+                    <Bot className="w-4 h-4 text-gray-800" />
                   </div>
-                  <div className="flex items-center gap-1.5 p-4 rounded-2xl bg-slate-800/70 border border-slate-700/50 rounded-tl-sm">
-                    <div className="w-2 h-2 rounded-full bg-brand-cyan/60 animate-bounce" style={{ animationDelay: '0ms' }} />
-                    <div className="w-2 h-2 rounded-full bg-brand-cyan/60 animate-bounce" style={{ animationDelay: '150ms' }} />
-                    <div className="w-2 h-2 rounded-full bg-brand-cyan/60 animate-bounce" style={{ animationDelay: '300ms' }} />
+                  <div className="flex items-center gap-1.5 p-4 rounded-2xl bg-gray-50 border border-gray-200 rounded-tl-sm shadow-sm">
+                    <div className="w-2 h-2 rounded-full bg-brand-blue/60 animate-bounce" style={{ animationDelay: '0ms' }} />
+                    <div className="w-2 h-2 rounded-full bg-brand-blue/60 animate-bounce" style={{ animationDelay: '150ms' }} />
+                    <div className="w-2 h-2 rounded-full bg-brand-blue/60 animate-bounce" style={{ animationDelay: '300ms' }} />
                   </div>
                 </motion.div>
             )}
           </div>
 
           {/* Input Area */}
-          <div className="p-5 bg-slate-900/50 border-t border-slate-700/50">
+          <div className="p-5 bg-gray-50 border-t border-gray-200">
             <form onSubmit={handleSend} className="relative flex items-center">
               <input 
                 type="text" 
                 value={inputVal}
                 onChange={(e) => setInputVal(e.target.value)}
                 placeholder="Enter risk consultation or audit request here..." 
-                className="glass-input w-full py-4 pl-5 pr-14 rounded-xl text-sm shadow-inner"
+                className="glass-input w-full py-4 pl-5 pr-14 rounded-xl text-sm"
               />
               <button 
                 type="submit" 
                 disabled={!inputVal.trim() || isTyping}
-                className="absolute right-2 p-2.5 rounded-lg bg-brand-cyan/20 text-brand-cyan hover:bg-brand-cyan hover:text-slate-900 transition-colors disabled:opacity-50 disabled:hover:bg-brand-cyan/20 disabled:hover:text-brand-cyan"
+                className="absolute right-2 p-2.5 rounded-lg bg-brand-blue text-white hover:bg-brand-blue/90 transition-colors disabled:opacity-50 disabled:hover:bg-brand-blue"
               >
                 <Send className="w-4 h-4" />
               </button>
@@ -184,29 +187,27 @@ function App() {
         </div>
 
         {/* 右侧：资料库状态监测 */}
-        <div className="w-full md:w-80 bg-slate-900/60 p-6 flex flex-col">
-          <h2 className="text-lg font-semibold text-slate-100 flex items-center gap-2 mb-6">
-            <Database className="w-5 h-5 text-brand-purple" />
-            Matrix Neural Node Status
+        <div className="w-full md:w-80 bg-gray-50/80 p-6 flex flex-col">
+          <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2 mb-6">
+            <Database className="w-5 h-5 text-brand-blue" />
+            System Status
           </h2>
 
           <div className="space-y-4">
             {/* Widget 1 */}
-            <div className="p-4 rounded-xl bg-slate-800/50 border border-slate-700/50">
-              <div className="flex justify-between items-center mb-2">
-                <span className="text-xs text-slate-400 font-medium">ChromaDB Connection</span>
-                <span className="flex items-center gap-1 text-xs text-emerald-400 bg-emerald-400/10 px-2 py-0.5 rounded-md border border-emerald-400/20"><CheckCircle2 className="w-3 h-3"/> Mounted</span>
+            <div className="p-4 rounded-xl bg-white border border-gray-200 shadow-sm">
+              <div className="flex justify-between items-center">
+                <span className="text-xs text-gray-600 font-medium">ChromaDB Connection</span>
+                <span className="flex items-center gap-1 text-xs text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200"><CheckCircle2 className="w-3 h-3"/> Mounted</span>
               </div>
-              <div className="text-2xl font-bold font-outfit text-slate-200">2 <span className="text-sm font-normal text-slate-500">Memory Chunks</span></div>
             </div>
 
             {/* Widget 2 */}
-            <div className="p-4 rounded-xl bg-slate-800/50 border border-slate-700/50">
-              <div className="flex justify-between items-center mb-2">
-                <span className="text-xs text-slate-400 font-medium">Postgres Checkpointer</span>
-                <span className="flex items-center gap-1 text-xs text-emerald-400 bg-emerald-400/10 px-2 py-0.5 rounded-md border border-emerald-400/20"><CheckCircle2 className="w-3 h-3"/> Active</span>
+            <div className="p-4 rounded-xl bg-white border border-gray-200 shadow-sm">
+              <div className="flex justify-between items-center">
+                <span className="text-xs text-gray-600 font-medium">Postgres Checkpointer</span>
+                <span className="flex items-center gap-1 text-xs text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200"><CheckCircle2 className="w-3 h-3"/> Active</span>
               </div>
-              <div className="text-2xl font-bold font-outfit text-slate-200"># <span className="text-sm font-normal text-slate-500">Thread Active</span></div>
             </div>
 
             {/* Upload Zone */}
@@ -216,29 +217,29 @@ function App() {
               onDragLeave={handleDragLeave}
               onDrop={handleDrop}
               className={`mt-8 border-2 border-dashed rounded-xl p-6 flex flex-col items-center justify-center text-center transition-all group ${
-                isUploading ? 'cursor-not-allowed border-brand-purple/40 bg-brand-purple/10' : 
-                isDragging ? 'border-brand-cyan bg-brand-cyan/20 scale-[1.02] cursor-copy' : 
-                'cursor-pointer border-slate-600/50 hover:border-brand-cyan/40 hover:bg-slate-800/50'
+                isUploading ? 'cursor-not-allowed border-brand-blue/40 bg-brand-blue/5' : 
+                isDragging ? 'border-brand-blue bg-brand-blue/5 scale-[1.02] cursor-copy' : 
+                'cursor-pointer border-gray-300 hover:border-brand-blue hover:bg-brand-blue/5 shadow-sm bg-white'
               }`}
             >
               <input type="file" ref={fileInputRef} onChange={handleFileUpload} accept=".pdf" className="hidden" />
-              <div className="w-12 h-12 rounded-full bg-slate-800 flex items-center justify-center mb-3 group-hover:scale-110 group-hover:bg-brand-cyan/20 transition-all">
+              <div className="w-12 h-12 rounded-full bg-gray-50 border border-gray-200 flex items-center justify-center mb-3 group-hover:scale-110 group-hover:bg-brand-yellow/20 group-hover:border-brand-yellow/50 transition-all">
                 {isUploading ? (
-                   <div className="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-brand-purple" />
+                   <div className="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-brand-blue" />
                 ) : (
-                   <UploadCloud className="w-6 h-6 text-slate-400 group-hover:text-brand-cyan" />
+                   <UploadCloud className="w-6 h-6 text-gray-400 group-hover:text-brand-blue" />
                 )}
               </div>
-              <p className={`text-sm font-medium ${isUploading ? 'text-brand-purple animate-pulse' : 'text-slate-300'}`}>
-                {isUploading ? 'Deep slicing and ingesting...' : 'Click here to upload'}
+              <p className={`text-sm font-medium ${isUploading ? 'text-brand-blue animate-pulse' : 'text-gray-700'}`}>
+                {isUploading ? 'Processing & indexing...' : 'Click here to upload'}
               </p>
-              <p className="text-xs text-slate-500 mt-1">Supports PDF compliance documents</p>
+              <p className="text-xs text-gray-500 mt-1">Supports PDF compliance documents</p>
             </div>
           </div>
           
           <div className="mt-auto pt-6 text-center">
-            <div className="inline-block px-3 py-1 rounded-full border border-slate-700 bg-slate-800/50 text-[10px] text-slate-400 font-mono">
-              SYSTEM: ALL GREEN
+            <div className="inline-block px-3 py-1 rounded-full border border-gray-200 bg-white text-[10px] text-gray-500 font-mono shadow-sm">
+              SYSTEM: SECURE
             </div>
           </div>
         </div>

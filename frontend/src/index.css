@@ -1,30 +1,30 @@
 @import "tailwindcss";
 
 @theme {
-  --color-brand-cyan: #22d3ee;
-  --color-brand-purple: #c084fc;
+  --color-brand-blue: #005eb8;
+  --color-brand-yellow: #ffd200;
   --font-inter: "Inter", sans-serif;
   --font-outfit: "Outfit", sans-serif;
 }
 
 @layer base {
   body {
-    /* Premium cyberpunk radial gradient background */
-    background-image: radial-gradient(circle at 50% -20%, #1e1b4b 0%, #020617 70%);
+    /* Clean corporate light background */
+    background-color: #f9fafb; /* Tailwind gray-50 */
   }
   h1, h2, h3, h4, h5, h6 {
-    /* Use Outfit font for futuristic headers */
+    /* Use Outfit font for clean readable headers */
     font-family: var(--font-outfit);
   }
 }
 
 @layer utilities {
   .glass-panel {
-    /* Global glassmorphism utility tailored for the UI */
-    @apply bg-slate-900/40 backdrop-blur-xl border border-white/10 shadow-[0_8px_32px_0_rgba(0,0,0,0.3)];
+    /* Clean white elevated panel */
+    @apply bg-white border border-gray-200 shadow-[0_8px_30px_rgb(0,0,0,0.06)];
   }
   .glass-input {
-    /* Cyber-styled input controls */
-    @apply bg-slate-800/50 border border-slate-700/50 focus:border-brand-cyan/50 focus:ring-1 focus:ring-brand-cyan/50 outline-none text-slate-200 placeholder-slate-500 transition-all;
+    /* Standard light UI input controls */
+    @apply bg-white border border-gray-300 focus:border-brand-blue focus:ring-2 focus:ring-brand-blue/20 outline-none text-gray-900 placeholder-gray-400 transition-all shadow-sm;
   }
 }

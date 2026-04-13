@@ -97,6 +97,7 @@ The entire application stack (Frontend, Backend, Postgres, ChromaDB, Redis) is c
 Create a `.env` file in the root directory and add your OpenRouter API key:
 ```bash
 OPENROUTER_API_KEY="your-api-key"
+LANGCHAIN_API_KEY="your-api-key" # optional
 ```
 
 ### 2. Start the Stack 
@@ -110,6 +111,9 @@ docker compose up -d --build
 - **Frontend UI**: `http://localhost:5173`
 - **Backend API Docs**: `http://localhost:8000/docs`
 - **PGAdmin (DB Viewer)**: `http://localhost:8080`
+- **LangSmith**: `https://smith.langchain.com/`
+
+![Risk Auditor Agent UI Showcase](assets/ui_showcase.png)
 
 ## 📊 Observability & Telemetry (LangSmith)
 
