@@ -28,25 +28,25 @@ An enterprise-grade, Multi-Agent Risk Management Assistant designed to parse, qu
 
 ```text
 .
-├── backend                 # Python backend service (FastAPI)
+├── backend                      # Python backend service (FastAPI)
 │   ├── app
-│   │   ├── main.py         # FastAPI entrypoint & HTTP routes
-│   │   ├── config.py       # Pydantic environment configuration, to avoid loading .env multiple times
-│   │   ├── prompts.py      # Core prompt templates for LLMs，separated for latter prompt engineering
+│   │   ├── main.py              # FastAPI entrypoint & HTTP routes
+│   │   ├── config.py            # Pydantic environment configuration, to avoid loading .env multiple times
+│   │   ├── prompts.py           # Core prompt templates for LLMs，separated for latter prompt engineering
 │   │   └── services
 │   │       ├── agent.py         # LangGraph state machine & AI logic
 │   │       ├── database.py      # PostgreSQL checkpointer
 │   │       └── vector_store.py  # ChromaDB semantic retrieval
-│   ├── Dockerfile          # Backend container definition
-│   └── tests               # Pytest testing suite
-├── frontend                # React web application (Vite)
+│   ├── Dockerfile               # Backend container definition
+│   └── tests                    # Pytest testing suite
+├── frontend                     # React web application (Vite)
 │   ├── src
-│   │   ├── App.jsx         # Main UI interface
-│   │   ├── App.css         # styling
-│   │   └── index.css       # styling
-│   ├── Dockerfile          # Frontend container definition
-│   └── nginx.conf          # NGINX configuration
-└── docker-compose.yml      # Orchestrates the entire stack (Chroma, Postgres, Redis, etc.)
+│   │   ├── App.jsx              # Main UI interface
+│   │   ├── App.css              # styling
+│   │   └── index.css            # styling
+│   ├── Dockerfile               # Frontend container definition
+│   └── nginx.conf               # NGINX configuration
+└── docker-compose.yml           # Orchestrates the entire stack (Chroma, Postgres, Redis, etc.)
 ```
 
 ## 🚀 Quick Start
