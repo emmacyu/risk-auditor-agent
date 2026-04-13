@@ -59,7 +59,8 @@ Create a `.env` file in the root directory and add your OpenRouter API key:
 OPENROUTER_API_KEY="your-api-key"
 ```
 
-### 2. Start the Stack
+### 2. Start the Stack 
+**Note**: do not forget to start the docker daemon in your local machine
 ```bash
 # Spins up the entire microservice ecosystem in the background
 docker compose up -d --build
