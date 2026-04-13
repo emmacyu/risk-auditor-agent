@@ -32,6 +32,12 @@ services:
     volumes:
       - ./.data/chroma_server:/chroma/chroma
 
+  redis:
+    image: redis/redis-stack-server:latest
+    container_name: risk_auditor_redis
+    ports:
+      - "6379:6379"
+
   backend:
     build: ./backend
     container_name: risk_auditor_backend
@@ -41,6 +47,7 @@ services:
       - DATABASE_URL=postgresql://${DB_USER:-postgres}:${DB_PASSWORD:-123456}@db:5432/${DB_NAME:-risk_auditor}
       - CHROMA_HOST=chromadb
       - CHROMA_PORT=8000
+      - REDIS_URL=redis://redis:6379
     ports:
       - "8000:8000"
     volumes:
@@ -48,6 +55,7 @@ services:
     depends_on:
       - db
       - chromadb
+      - redis
 
   frontend:
     build: ./frontend

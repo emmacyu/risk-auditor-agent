@@ -19,14 +19,30 @@ from langgraph.checkpoint.postgres.aio import AsyncPostgresSaver
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     print("🚀 [FastAPI Engine Start] Taking over the Postgres long-lived connection...")
-    pool = get_db_pool()
+    
+    # Initialize Semantic LLM Cache to save token costs on roughly similar queries
+    from langchain_core.globals import set_llm_cache
+    from langchain_community.cache import RedisCache
+    from redis import Redis
+    from app.config import settings
+    
+    redis_client = Redis.from_url(settings.REDIS_URL)
+    set_llm_cache(RedisCache(redis_=redis_client))
+    print("🧠 [LLM Cache] Exact-Match RedisCache enabled (Semantic replaced for stability).")
+
+    pool = get_db_pool()  # db singleton
     await pool.open()
     checkpointer = AsyncPostgresSaver(pool)
     await checkpointer.setup()
     
     # Dynamically bind the stateful agent to the FastAPI context
     app.state.agent_app = agent_builder.compile(checkpointer=checkpointer)
+    
+    # generator control: execution pauses here. The FastAPI engine takes over to handle incoming HTTP requests.
+    # The code remains suspended at this line for the entire duration of the app's uptime.
+    # It resumes execution to clean up resources only when a shutdown signal (e.g., Ctrl+C) is received.
     yield
+    
     print("🛑 [FastAPI Engine Stop] Releasing Postgres DB resources...")
     await pool.close()
 

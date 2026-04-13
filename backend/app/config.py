@@ -10,6 +10,7 @@ class Settings(BaseSettings):
     # 如果这些变量在环境变量或 .env 中找不到，Pydantic 会在此文件被导入的瞬间当场抛出异常，拒绝启动。
     OPENROUTER_API_KEY: str
     DATABASE_URL: str
+    REDIS_URL: str
     
     # 精准锁定绝对路径
     model_config = SettingsConfigDict(
@@ -18,5 +19,4 @@ class Settings(BaseSettings):
         extra="ignore"
     )
 
-# 实例化一个单例模式的全局配置对象
-settings = Settings()
+settings = Settings()  # singleton
