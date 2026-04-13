@@ -1,37 +1,37 @@
 import pytest
+import pytest_asyncio
 import asyncio
 import sys
+import os
 from pathlib import Path
 
-# Fix sys.path for direct testing
-project_root = Path(__file__).resolve().parent.parent.parent
-sys.path.append(str(project_root))
-sys.path.append(str(project_root / "backend"))
+# Add backend directory to sys.path so 'app' can be resolved
+backend_dir = Path(os.path.abspath(__file__)).parent.parent
+sys.path.append(str(backend_dir))
 
 from app.services.agent import agent_builder
 from langchain_core.messages import HumanMessage
 from app.services.database import get_db_pool
+from psycopg_pool import AsyncConnectionPool
 from langgraph.checkpoint.postgres.aio import AsyncPostgresSaver
-
-@pytest.fixture(scope="module")
-def event_loop():
-    """Create an instance of the default event loop for each test case."""
-    loop = asyncio.get_event_loop_policy().new_event_loop()
-    yield loop
-    loop.close()
-
 from app.services.database import get_db_pool
 import app.services.database as database
 
-@pytest.fixture(scope="module")
+@pytest_asyncio.fixture(scope="function")
 async def db_pool():
-    database._pool = None  # Force a fresh pool explicitly
-    pool = get_db_pool()
-    await pool.open()
-    yield pool
-    await pool.close()
+    # Instantiate a completely fresh pool for each test so event loop won't collision
+    fresh_pool = AsyncConnectionPool(
+        conninfo=database.DB_URI,
+        max_size=5,
+        timeout=1.0,
+        kwargs=database.connection_kwargs,
+        open=False
+    )
+    await fresh_pool.open()
+    yield fresh_pool
+    await fresh_pool.close()
 
-@pytest.fixture(scope="module")
+@pytest_asyncio.fixture(scope="function")
 async def agent_app(db_pool):
     memory = AsyncPostgresSaver(db_pool)
     await memory.setup()
