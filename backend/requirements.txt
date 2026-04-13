@@ -15,3 +15,6 @@ psycopg_pool
 pydantic-settings
 sentence-transformers
 redis<5.0.0
+pytest
+pytest-asyncio
+httpx

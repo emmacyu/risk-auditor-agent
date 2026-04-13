@@ -1,0 +1,34 @@
+name: Risk Auditor CI
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Ensure correct file permissions
+      run: chmod +x backend/scripts/*.sh || true
+
+    - name: Launch local Docker infrastructure
+      run: |
+        docker-compose up -d --build
+        echo "Waiting for services (Postgres, Redis, Chroma) to stabilize..."
+        sleep 10
+        
+        # Verify containers are running
+        docker ps -a
+
+    - name: Run Pytest Automation Robot
+      run: |
+        docker exec risk_auditor_backend bash -c "pytest tests/test_api.py -v -s"
+        docker exec risk_auditor_backend bash -c "pytest tests/test_eval_robot.py -v -s --asyncio-mode=auto"
+        
+    - name: Shutdown infrastructure
+      if: always()
+      run: docker-compose down
