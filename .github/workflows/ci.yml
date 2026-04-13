@@ -15,6 +15,13 @@ jobs:
     - name: Ensure correct file permissions
       run: chmod +x backend/scripts/*.sh || true
 
+    - name: Generate .env file from secrets
+      run: |
+        echo "OPENROUTER_API_KEY=${{ secrets.OPENROUTER_API_KEY }}" > .env
+        echo "DB_USER=admin_risk" >> .env
+        echo "DB_PASSWORD=test123" >> .env
+        echo "DB_NAME=risk_history" >> .env
+
     - name: Launch local Docker infrastructure
       run: |
         docker-compose up -d --build
