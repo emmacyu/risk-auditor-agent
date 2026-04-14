@@ -4,6 +4,7 @@
 [![LangGraph](https://img.shields.io/badge/LangGraph-1C3C5A?style=for-the-badge)](#)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-316192?style=for-the-badge&logo=postgresql&logoColor=white)](#)
 [![ChromaDB](https://img.shields.io/badge/ChromaDB-FF6B6B?style=for-the-badge)](#)
+[![LangSmith](https://img.shields.io/badge/LangSmith-1C3C5A?style=for-the-badge)](#)
 
 A smart assistant that helps our risk officers understand and "talk" to complex risk management documents.
 
