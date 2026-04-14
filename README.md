@@ -165,3 +165,4 @@ If granted a one-month roadmap, I would evolve this prototype into a complete En
 3. **RLHF via HITL Logs**: Re-invest all human overrides and auditor rejection checkpoints into a continuous Direct Preference Optimization (DPO) pipeline, effectively creating a self-healing localized fine-tuned LLM policy.
 4. **Multi-Agent Federation**: Dissolve the monolithic graph into explicitly disparate Swarm Agents (Legal Agent, Accounting Agent, Manager Agent) isolated via strict RBAC (Role-Based Access Controls).
 5. **MCP Integration**: Integrate with MCP tools to enable the agent to interact with other tools and services when needed.
+6. **Finetune the model & Improve evaluation**: Build golden dataset to finetune a local LLM and evaluate the system performance and accuracy.
