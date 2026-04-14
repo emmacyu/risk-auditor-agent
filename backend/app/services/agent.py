@@ -87,7 +87,7 @@ def retrieve_node(state: AgentState):
 
     query = last_msg
     
-    # 🚨 1st Advanced Mechanism: Contextual Query Rewrite (Resolving Pronouns)
+    # 1st Advanced Mechanism: Contextual Query Rewrite (Resolving Pronouns)
     if len(messages) > 1 and state.get("retry_count", 0) == 0:
         history_text = "\n".join([f"{m.type}: {m.content}" for m in messages[-4:-1]])
         rewrite_prompt = REWRITE_PROMPT.format(history_text=history_text, last_msg=last_msg)
@@ -95,7 +95,7 @@ def retrieve_node(state: AgentState):
         query = rewrite_resp.content.strip()
         print(f"🔄 [Context Rewrite] '{last_msg}' -> '{query}'")
 
-    # 🚨 2nd Advanced Mechanism: Query Expansion based on Auditor Rejections
+    # 2nd Advanced Mechanism: Query Expansion based on Auditor Rejections
     if state.get("retry_count", 0) > 0 and state.get("audit_trail"):
         feedback = state["audit_trail"][-1]
         expand_prompt = EXPAND_PROMPT.format(query=query, feedback=feedback)
