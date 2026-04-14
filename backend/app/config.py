@@ -2,7 +2,7 @@ from pathlib import Path
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
-# backend/app/config.py (自身) -> app (退1层) -> backend (退2层) -> root (退3层)
+# backend/app/config.py -> app -> backend -> root
 ROOT_DIR = Path(__file__).resolve().parent.parent.parent
 ENV_FILE_PATH = ROOT_DIR / ".env"
 
@@ -17,7 +17,7 @@ class Settings(BaseSettings):
     FALLBACK_LLM_MODEL: str = "anthropic/claude-3-haiku"
     EMBEDDING_MODEL: str = "all-MiniLM-L6-v2"
     
-    # 精准锁定绝对路径
+    # lock absolute path
     model_config = SettingsConfigDict(
         env_file=str(ENV_FILE_PATH), 
         env_file_encoding="utf-8", 
