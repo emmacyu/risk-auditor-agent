@@ -80,9 +80,7 @@ graph LR;
     auditor_node -.Hallucinate.-> retrieve_node;
     auditor_node -.Pass.-> __end__;
 
-    %% 这是一个透明的占位符节点，专门用来把 GitHub 的放大缩小控件往右边顶开，防止遮挡 END 节点
-    __end__ ~~~ padding_node[" "]
-    style padding_node fill:none,stroke:none
+
 
     classDef default fill:#f2f0ff,line-height:1.2,stroke:#bfb6fc,stroke-width:2px
     classDef first fill-opacity:0,stroke:#888
